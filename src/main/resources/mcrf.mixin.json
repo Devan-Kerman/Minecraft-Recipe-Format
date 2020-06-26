@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "net.devtech.mcrf.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "mixins": [
+    "RecipeManagerMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

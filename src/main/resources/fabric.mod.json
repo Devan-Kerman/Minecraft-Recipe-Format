@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "mcrf",
+  "version": "${version}",
+  "name": "Minecraft-Recipe-Format",
+  "description": "a better recipe format for all!",
+  "authors": [
+    "HalfOf2"
+  ],
+  "entrypoints": {
+    "main": [
+      "net.devtech.mcrf.MCRF"
+    ]
+  },
+  "contact": {
+    "sources": "https://github.com/Devan-Kerman/Minecraft-Recipe-Format"
+  },
+  "license": "MPLv2",
+  "icon": "assets/mcrf/icon.png",
+  "environment": "*",
+  "depends": {
+    "fabricloader": ">=0.7.8+build.187",
+    "fabric": "*",
+    "minecraft": ">=1.14.4"
+  },
+  "mixins": [
+    "mcrf.mixin.json"
+  ]
+}

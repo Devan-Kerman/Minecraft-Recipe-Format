@@ -1,0 +1,10 @@
+mcrf:test + [
+    [stone, stone, stone],
+    [stone, air, stone],
+    [stone, stone, stone]
+] --[mcrf:crafting_table]-> stone{nbt:3} x8
+mcrf:test_2 + [
+    [stone{nbt:3}, air, stone{nbt:3}],
+    [air, air, air],
+    [air, air, air]
+] --[mcrf:crafting_table]-> stone{nbt:4} x10

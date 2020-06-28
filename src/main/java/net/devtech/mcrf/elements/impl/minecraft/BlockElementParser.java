@@ -6,7 +6,7 @@ import java.io.Reader;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.devtech.mcrf.elements.ElementParser;
-import net.devtech.mcrf.util.IOUtil;
+import net.devtech.mcrf.util.MCRFUtil;
 import net.devtech.mcrf.util.world.BlockData;
 
 import net.minecraft.block.BlockState;
@@ -18,8 +18,8 @@ public class BlockElementParser implements ElementParser<BlockData> {
 	@Override
 	public BlockData parse(Reader reader) throws IllegalArgumentException, IOException {
 		Identifier identifier = IDENTIFIER.parse(reader);
-		IOUtil.skipWhitespace(reader);
-		String blockstate = identifier+IOUtil.readBetween(reader, '[', ']');
+		MCRFUtil.skipWhitespace(reader);
+		String blockstate = identifier + MCRFUtil.readBetween(reader, '[', ']');
 		BlockArgumentParser parser = new BlockArgumentParser(new StringReader(blockstate), false);
 		try {
 			parser.parse(false);

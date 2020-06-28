@@ -2,6 +2,8 @@ package net.devtech.mcrf.util;
 
 import java.util.Objects;
 
+import net.minecraft.util.Identifier;
+
 public final class Id {
 	public final String namespace;
 	public final String val;
@@ -22,6 +24,10 @@ public final class Id {
 
 		this.namespace = namespace;
 		this.val = val;
+	}
+
+	public Identifier asIdentifier() {
+		return new Identifier(this.namespace, this.val);
 	}
 
 	@Override

@@ -3,7 +3,10 @@
   "package": "net.devtech.mcrf.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "RecipeManagerMixin"
+    "DefaultedListAccess",
+    "ItemEntityAccess",
+    "RecipeManagerMixin",
+    "recipes.FallingBlockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

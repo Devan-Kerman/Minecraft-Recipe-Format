@@ -1,0 +1,52 @@
+% comments are suppported
+% recipes are described as follows
+%
+% <input a> + <input b>... --[machine:id]-> <output b> + <output a>....
+%
+% so, shaped crafting recipes take an identifier, and an array of arrays of item ids as it's parameters
+% the identifier is the id of the recipe, and the array of arrays are it's ingredients
+% the output of the recipe is an itemstack
+
+% itemstacks
+% identifier{nbt data} 'x'Count
+% mymod:item_id{nbt:"data"} x64
+
+% blocks
+% identifier[blockstate properties]{block entity data}
+% mymod:block_id[facing=north]{nbt:"data"}
+
+% entities
+% identifier{entity data}
+% mymod:entity_id{nbt:"data"}
+
+% shaped
+mcrf:test_shaped + [
+    [stone, #stone, stone],
+    [stone, air, stone],
+    [stone, stone, stone]
+] --[minecraft:crafting_table]-> stone{nbt:"\% escaping is supported"} x8
+
+% shapeless
+mcrf:test_shapeless + [
+    #stone,
+    #stone,
+    #stone
+] --[minecraft:crafting_table]-> iron_ingot x4
+
+% stone cutter
+mcrf:test_stone_cutter + iron_block --[minecraft:stone_cutter]-> iron_ingot x9
+
+% smithing
+mcrf:test_smithing + iron_ingot + gold_ingot --[minecraft:smithing_table]-> tnt
+
+% campfire
+mcrf:test_campfire + iron_ore --[minecraft:campfire]-> iron_nugget x2 + .3 + 25
+
+% smoking
+mcrf:test_smoking + gold_ore --[minecraft:smoker]-> iron_nugget x2 + .3 + 25
+
+% blasting
+mcrf:test_blasting + lapis_ore --[minecraft:blast_furnace]-> iron_nugget x18 + .3 + 25
+
+% furnace
+mcrf:test_furnace + tnt --[minecraft:furnace]-> iron_nugget x9 + .3 + 25

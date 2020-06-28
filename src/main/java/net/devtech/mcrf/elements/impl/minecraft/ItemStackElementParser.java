@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 import net.devtech.mcrf.elements.ElementParser;
-import net.devtech.mcrf.util.IOUtil;
+import net.devtech.mcrf.util.MCRFUtil;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -15,9 +15,9 @@ public class ItemStackElementParser implements ElementParser<ItemStack> {
 	@Override
 	public ItemStack parse(Reader reader) throws IllegalArgumentException, IOException {
 		Item item = Registry.ITEM.get(IDENTIFIER.parse(reader));
-		IOUtil.skipWhitespace(reader);
+		MCRFUtil.skipWhitespace(reader);
 		CompoundTag tag = NBT.parse(reader);
-		IOUtil.skipWhitespace(reader);
+		MCRFUtil.skipWhitespace(reader);
 		int count = 1;
 		reader.mark(1);
 		int chr = reader.read();

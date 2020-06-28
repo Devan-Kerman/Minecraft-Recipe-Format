@@ -7,29 +7,37 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
-import net.devtech.mcrf.elements.impl.java.ArrayElementParser;
+import net.devtech.mcrf.elements.impl.RetroactiveElementParser;
 import net.devtech.mcrf.elements.impl.java.FloatingElementParser;
 import net.devtech.mcrf.elements.impl.java.IntegerElementParser;
+import net.devtech.mcrf.elements.impl.java.ListElementParser;
 import net.devtech.mcrf.elements.impl.java.StringElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.BlockElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.EntityElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.IdentifierParser;
+import net.devtech.mcrf.elements.impl.minecraft.IngredientElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.ItemElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.ItemStackElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.NbtElementParser;
+import net.devtech.mcrf.recipes.RecipeSchema;
+import net.devtech.mcrf.util.Id;
 import net.devtech.mcrf.util.world.BlockData;
 import net.devtech.mcrf.util.world.EntityData;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.recipe.Ingredient;
 import net.minecraft.util.Identifier;
 
 public interface ElementParser<T> {
+
 	/**
-	 * this is a pattern for matching the end of an element, depending on your parser, you may need this. Arrays don't need this because they have their own delimited ([]), but Integers and Doubles don't, so they use this
+	 * this is a pattern for matching the end of the default elements, depending on your parser, you may need this. Arrays don't need this because they have their own delimited ([]), but Integers and Doubles don't, so they use this
 	 */
-	String ENDING_DELIMITER = "[\\s,+\\-]";
+	String ENDING_DELIMITER = "[,+\\-\\]]";
+	// super special
+	RetroactiveElementParser RETROACTIVE = new RetroactiveElementParser();
 
 	// minecraft specific types
 	ElementParser<CompoundTag> NBT = new NbtElementParser();
@@ -38,6 +46,7 @@ public interface ElementParser<T> {
 	ElementParser<EntityData<?>> ENTITY = new EntityElementParser();
 	ElementParser<ItemStack> ITEM_STACK = new ItemStackElementParser();
 	ElementParser<Item> ITEM = new ItemElementParser();
+	ElementParser<Ingredient> INGREDIENT = new IngredientElementParser();
 
 	// integer types, all support hex, binary and decimal
 	ElementParser<Byte> BYTE = (IntegerElementParser) Byte::parseByte;
@@ -76,12 +85,28 @@ public interface ElementParser<T> {
 	};
 	ElementParser<Character> CHARACTER = r -> (char) r.read();
 
-	static <T> ElementParser<List<T>> array(ElementParser<T> type) {
-		return new ArrayElementParser<>(type);
+	static <T> ElementParser<List<T>> list(ElementParser<T> type) {
+		return new ListElementParser<>(type);
 	}
 
 	/**
 	 * do not read what you do not need! mark is supported, use it!
 	 */
 	T parse(Reader reader) throws IllegalArgumentException, IOException;
+
+	default boolean finalizing() {
+		return false;
+	}
+
+	default boolean needsPostProcessing() {
+		return false;
+	}
+
+	/**
+	 * only called for first elements, as secondary elements already have ID information
+	 * @return all the objects that are parsed from the initial object
+	 */
+	default Object[] postProcess(RecipeSchema schema, Id id, T object) {
+		throw new IllegalArgumentException("does not need post processing!");
+	}
 }

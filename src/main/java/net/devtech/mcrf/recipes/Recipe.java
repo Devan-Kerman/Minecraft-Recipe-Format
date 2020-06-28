@@ -1,6 +1,6 @@
 package net.devtech.mcrf.recipes;
 
-import static net.devtech.mcrf.util.IOUtil.skipWhitespace;
+import static net.devtech.mcrf.util.MCRFUtil.skipWhitespace;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,15 +15,20 @@ import java.util.MissingFormatArgumentException;
 import java.util.UnknownFormatConversionException;
 import java.util.function.BiPredicate;
 
+import com.google.common.collect.Iterators;
 import net.devtech.mcrf.elements.ElementParser;
-import net.devtech.mcrf.util.IOUtil;
+import net.devtech.mcrf.util.MCRFUtil;
 import net.devtech.mcrf.util.Id;
+import net.devtech.mcrf.util.io.CommentStrippingReader;
+import net.devtech.mcrf.util.io.LineTrackingReader;
 
 /**
  * a machine's recipe
  */
 public final class Recipe {
-	private static final char[] START = "--[".toCharArray();
+	public static final String START_STR = "--[";
+
+	private static final char[] START = START_STR.toCharArray();
 	private static final char[] END = "]->".toCharArray();
 
 	private final Id machine;
@@ -36,35 +41,57 @@ public final class Recipe {
 		this.outputs = outputs;
 	}
 
-	public static List<Recipe> parse(Reader reader, RecipeSchema schema) throws IOException {
-		if(!reader.markSupported()) {
-			throw new IllegalArgumentException("Reader must support mark()!");
-		}
-
+	public static List<Recipe> parse(LineTrackingReader reader, RecipeSchema schema) throws IOException {
 		List<Recipe> recipes = new ArrayList<>();
 		while (true) {
-			IOUtil.skipWhitespace(reader);
+			MCRFUtil.skipWhitespace(reader);
 			reader.mark(1);
 			int chr = reader.read();
 			if(chr == -1)
 				break;
 			reader.reset();
-			Object[] inputs = read(reader, schema.getInputs(), false);
-			Id id = readMachine(reader);
-			Object[] outputs = read(reader, schema.getOutputs(), true);
-			recipes.add(new Recipe(id, inputs, outputs));
+			try {
+				Object[] inputs = read(reader, schema.getInputs(), false);
+				Id id = readMachine(reader);
+				Object[] outputs = read(reader, schema.getOutputs(id), true);
+				recipes.add(new Recipe(id, postProcess(inputs, id, schema), outputs));
+			} catch (Throwable t) {
+				System.err.println("Syntax exception on line: " + reader.getLineNumber());
+				System.err.println(reader.getLine() + " <-- error");
+				t.printStackTrace();
+			}
 		}
 		return recipes;
 	}
 
+	private static Object[] postProcess(Object[] inputs, Id machine, RecipeSchema schema) {
+		if(schema instanceof RecipeSchema.RetroactiveSchema) {
+			ArrayList<Object> list = new ArrayList<>();
+			Iterator<Object> iterator = Iterators.forArray(inputs);
+			Iterator<ElementParser<?>> parsers = schema.getInputs();
+			while (iterator.hasNext()) {
+				Object next = iterator.next();
+				ElementParser parser = parsers.next();
+				if(parser.needsPostProcessing()) {
+					list.addAll(Arrays.asList(parser.postProcess(schema, machine, next)));
+				} else {
+					list.add(next);
+				}
+			}
+			return list.toArray();
+		}
+		return inputs;
+	}
+
 	public static List<Recipe> parse(InputStream stream, RecipeSchema schema) throws IOException {
-		return parse(new BufferedReader(new InputStreamReader(stream)), schema);
+		return parse(new LineTrackingReader(new BufferedReader(new CommentStrippingReader(new InputStreamReader(stream)))), schema);
 	}
 
 	private static Id readMachine(Reader reader) throws IOException {
 		char[] arr = new char[3];
 		String stage = "starting";
-		if (reader.read(arr) == START.length && Arrays.equals(arr, START)) {
+		if (reader.read(arr)
+		    == START.length && Arrays.equals(arr, START)) {
 			StringBuilder idBuilder = new StringBuilder();
 			int read;
 			while (true) {
@@ -96,15 +123,24 @@ public final class Recipe {
 		throw new MissingFormatArgumentException("machine segments must be represented as '--[machine:id]->' but found " + new String(arr) + " as " + stage + " chars instead!");
 	}
 
-	private static Object[] read(Reader reader, Iterator<ElementParser<?>> iterator, boolean ignoreEnd) throws IOException {
+	/**
+	 * @deprecated internal api
+	 */
+	@Deprecated
+	public static Object[] read(Reader reader, Iterator<ElementParser<?>> iterator, boolean ignoreEnd) throws IOException {
 		List<Object> inputs = new ArrayList<>();
+		skipWhitespace(reader);
 		while (iterator.hasNext()) {
 			ElementParser<?> input = iterator.next();
+			if(input.finalizing() && iterator.hasNext()) {
+				throw new IllegalArgumentException("Finalizing element parser is not at the end of the stream!");
+			}
 			try {
 				inputs.add(input.parse(reader));
 			} catch (Throwable t) {
 				t.printStackTrace();
 			}
+
 			skipWhitespace(reader);
 			// only non-last elements need + checking
 			if (iterator.hasNext()) {
@@ -114,11 +150,12 @@ public final class Recipe {
 					if(ignoreEnd) {
 						reader.reset();
 					} else {
-						throw new MissingFormatArgumentException("Error extra character : " + (char)c + " found!");
+						throw new MissingFormatArgumentException("Error extra character : '" + (char)c + "' found!");
 					}
 				}
+				skipWhitespace(reader);
 			}
-			skipWhitespace(reader);
+
 		}
 		return inputs.toArray();
 	}

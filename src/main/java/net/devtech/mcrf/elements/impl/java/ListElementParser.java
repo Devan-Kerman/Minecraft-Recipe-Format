@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.devtech.mcrf.elements.ElementParser;
-import net.devtech.mcrf.util.IOUtil;
+import net.devtech.mcrf.util.MCRFUtil;
 
-public class ArrayElementParser<T> implements ElementParser<List<T>> {
+public class ListElementParser<T> implements ElementParser<List<T>> {
 	private final ElementParser<T> element;
 
-	public ArrayElementParser(ElementParser<T> element) {
+	public ListElementParser(ElementParser<T> element) {
 		this.element = element;
 	}
 
@@ -21,12 +21,14 @@ public class ArrayElementParser<T> implements ElementParser<List<T>> {
 			throw new IllegalArgumentException("Arrays must start with '['!");
 		List<T> list = new ArrayList<>();
 		while (true) {
-			IOUtil.skipWhitespace(reader);
+			MCRFUtil.skipWhitespace(reader);
 			list.add(this.element.parse(reader));
-			IOUtil.skipWhitespace(reader);
+			MCRFUtil.skipWhitespace(reader);
 			int next = reader.read();
 			if(next == ']')
 				break;
+			else if(next == -1)
+				throw new IllegalStateException("reached end of file!");
 			else if(next != ',') {
 				throw new IllegalArgumentException("Arrays must be separated by ','! found: " + (char)next);
 			}

@@ -13,8 +13,8 @@ public interface IntegerElementParser<T> extends ElementParser<T> {
 	@Override
 	default T parse(Reader reader) throws IllegalArgumentException, IOException {
 		int base;
-		reader.mark(2);
 		char[] header = new char[2];
+		reader.mark(2);
 		int read = reader.read(header);
 		if(read == HEX_HEADER.length && Arrays.equals(header, HEX_HEADER)) {
 			base = 16;
@@ -24,6 +24,7 @@ public interface IntegerElementParser<T> extends ElementParser<T> {
 			base = 10;
 			reader.reset();
 		}
+
 		StringBuilder builder = new StringBuilder();
 		while (true) {
 			reader.mark(1);

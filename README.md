@@ -1,11 +1,23 @@
 # Minecraft-Recipe-Format
 An enhanced format for recipes
 
+# Maven
+```
+repositories {
+	maven {
+		url = 'https://raw.githubusercontent.com/Devan-Kerman/Devan-Repo/master/'
+	}
+}
+dependencies {
+  modImplementation group: 'net.devtech', name: 'Minecraft-Recipe-Format', version: '1.0-SNAPSHOT'
+}
+```
+
 # MCRF user documentation
 
 ## Format
 
-(input 1) + (input 2) + (input 3)... --[machine:id]-> (output 1) + (output 2) + (output 3)
+`(input 1) + (input 2) + (input 3)... --[machine:id]-> (output 1) + (output 2) + (output 3)`
 
 different parsers have different specifications.
 
@@ -134,7 +146,7 @@ item:id x10
 ```
 
 # Default recipes:
-## Anvils
+## Anvils (Retroactive)
 `mcrf/falling_anvil`
 has support for normal anvil recipes, and falling anvil recipes
 for normal anvils, the format is
@@ -149,7 +161,7 @@ or for falling anvils
 (block id | block tag) + list of mcrf ingredients + boolean --[mcrf:falling_anvil]-> (* | block) + list of itemstacks
 ```
 
-## Minecraft recipes
+## Minecraft recipes (Retroactive)
 mcrf/minecraft
 all recipe's first ingredient is the identifier of the recipe, and yes, you can override vanilla recipes with this
 

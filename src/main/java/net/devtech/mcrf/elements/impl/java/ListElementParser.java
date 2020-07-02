@@ -8,6 +8,9 @@ import java.util.List;
 import net.devtech.mcrf.elements.ElementParser;
 import net.devtech.mcrf.util.MCRFUtil;
 
+/**
+ * parses a list of elements
+ */
 public class ListElementParser<T> implements ElementParser<List<T>> {
 	private final ElementParser<T> element;
 

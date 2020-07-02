@@ -5,6 +5,9 @@ import java.io.Reader;
 
 import net.devtech.mcrf.elements.ElementParser;
 
+/**
+ * parses floating point integers
+ */
 public interface FloatingElementParser<T> extends ElementParser<T> {
 	@Override
 	default T parse(Reader reader) throws IllegalArgumentException, IOException {

@@ -7,28 +7,40 @@ import java.math.BigInteger;
 import java.util.Arrays;
 import java.util.List;
 
+import com.mojang.datafixers.util.Either;
 import net.devtech.mcrf.elements.impl.RetroactiveElementParser;
 import net.devtech.mcrf.elements.impl.java.FloatingElementParser;
 import net.devtech.mcrf.elements.impl.java.IntegerElementParser;
 import net.devtech.mcrf.elements.impl.java.ListElementParser;
+import net.devtech.mcrf.elements.impl.java.ListOrOtherElementParser;
+import net.devtech.mcrf.elements.impl.java.ListOrSingletonElementParser;
+import net.devtech.mcrf.elements.impl.java.OneOrTheOtherElementParser;
 import net.devtech.mcrf.elements.impl.java.StringElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.BlockElementParser;
+import net.devtech.mcrf.elements.impl.minecraft.CountedTagElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.EntityElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.IdentifierParser;
 import net.devtech.mcrf.elements.impl.minecraft.IngredientElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.ItemElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.ItemStackElementParser;
 import net.devtech.mcrf.elements.impl.minecraft.NbtElementParser;
+import net.devtech.mcrf.elements.impl.minecraft.TagElementParser;
+import net.devtech.mcrf.elements.impl.minecraft.TagListElementParser;
 import net.devtech.mcrf.recipes.RecipeSchema;
 import net.devtech.mcrf.util.Id;
-import net.devtech.mcrf.util.world.BlockData;
-import net.devtech.mcrf.util.world.EntityData;
+import net.devtech.mcrf.util.MCRFUtil;
+import net.devtech.mcrf.util.minecraft.BlockData;
+import net.devtech.mcrf.util.minecraft.CountedTags;
+import net.devtech.mcrf.util.minecraft.EntityData;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.recipe.Ingredient;
+import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
+
+import net.fabricmc.fabric.api.tag.TagRegistry;
 
 public interface ElementParser<T> {
 
@@ -40,13 +52,30 @@ public interface ElementParser<T> {
 	RetroactiveElementParser RETROACTIVE = new RetroactiveElementParser();
 
 	// minecraft specific types
+	ElementParser<Identifier> TAG = new TagElementParser();
 	ElementParser<CompoundTag> NBT = new NbtElementParser();
 	ElementParser<Identifier> IDENTIFIER = new IdentifierParser();
 	ElementParser<BlockData> BLOCK = new BlockElementParser();
 	ElementParser<EntityData<?>> ENTITY = new EntityElementParser();
 	ElementParser<ItemStack> ITEM_STACK = new ItemStackElementParser();
 	ElementParser<Item> ITEM = new ItemElementParser();
+	ElementParser<List<Identifier>> IDENTIFIERS = listOrSingleton(IDENTIFIER);
 	ElementParser<Ingredient> INGREDIENT = new IngredientElementParser();
+	ElementParser<CountedTags<Item>> ITEM_COUNTED_TAGS = new CountedTagElementParser<Item>() {
+		@Override
+		protected Tag<Item> get(Identifier identifier) {
+			return TagRegistry.item(identifier);
+		}
+	};
+
+	ElementParser<Either<CountedTags<Item>, ItemStack>> MCRF_INGREDIENT = new OneOrTheOtherElementParser<>(r -> {
+		r.mark(1);
+		if(r.read() == '#') {
+			return true;
+		}
+		r.reset();
+		return false;
+	}, ITEM_COUNTED_TAGS, ITEM_STACK);
 
 	// integer types, all support hex, binary and decimal
 	ElementParser<Byte> BYTE = (IntegerElementParser) Byte::parseByte;
@@ -87,6 +116,10 @@ public interface ElementParser<T> {
 
 	static <T> ElementParser<List<T>> list(ElementParser<T> type) {
 		return new ListElementParser<>(type);
+	}
+
+	static <T> ElementParser<List<T>> listOrSingleton(ElementParser<T> type) {
+		return new ListOrSingletonElementParser<>(type);
 	}
 
 	/**

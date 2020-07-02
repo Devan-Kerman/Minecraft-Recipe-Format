@@ -1,4 +1,4 @@
-package net.devtech.mcrf.util.world;
+package net.devtech.mcrf.util.minecraft;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -9,6 +9,10 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+/**
+ * an entity and it's data
+ * eg. namespace:path{nbt:data}
+ */
 public final class EntityData<T extends Entity> {
 	private final EntityType<T> type;
 	private final CompoundTag tag;

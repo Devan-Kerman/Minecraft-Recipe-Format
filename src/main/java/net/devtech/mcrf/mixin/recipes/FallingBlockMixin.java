@@ -4,13 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import com.mojang.datafixers.util.Either;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.devtech.mcrf.defaults.AnvilRecipe;
-import net.devtech.mcrf.mixin.DefaultedListAccess;
+import net.devtech.mcrf.defaults.AnvilRecipes;
 import net.devtech.mcrf.recipes.Recipe;
 import net.devtech.mcrf.util.MCRFUtil;
-import net.devtech.mcrf.util.world.BlockData;
+import net.devtech.mcrf.util.minecraft.BlockData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,10 +22,8 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.FallingBlockEntity;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.tag.Tag;
 import net.minecraft.util.Identifier;
-import net.minecraft.util.ItemScatterer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
@@ -47,7 +42,7 @@ public abstract class FallingBlockMixin extends Entity {
 	@Inject (method = "handleFallDamage", at = @At ("HEAD"))
 	private void land(float fallDistance, float damageMultiplier, CallbackInfoReturnable<Boolean> cir) {
 		if (!this.world.isClient && ANVILS.contains(this.block.getBlock())) {
-			for (Recipe recipe : AnvilRecipe.RECIPES) {
+			for (Recipe recipe : AnvilRecipes.MCRF) {
 				boolean flaming = recipe.getInput(2);
 				if (flaming) {
 					if (!this.isOnFire()) {
@@ -74,48 +69,14 @@ public abstract class FallingBlockMixin extends Entity {
 					continue;
 				}
 
-				List<ItemStack> ingredients = recipe.getInput(1);
-				List<ItemEntity> stacks = this.world.getEntities(EntityType.ITEM, new Box(this.getBlockPos()), e -> true);
-				Object2IntMap<ItemEntity> removed = new Object2IntOpenHashMap<>();
-				if (!ingredients.isEmpty()) {
-					boolean allSatisfied = true;
-					for (ItemStack ingredient : ingredients) {
-						if (!stacks.removeIf(i -> MCRFUtil.hasAtleast(i.getStack(), ingredient) && removed.put(i, ingredient.getCount()) != Integer.MIN_VALUE)) {
-							allSatisfied = false;
-						}
-					}
 
-					if (!allSatisfied) {
-						continue;
-					}
+
+				if(MCRFUtil.executeInWorldRecipe(this.world, this.getBlockPos(), recipe.getInput(1), recipe.getOutput(1))) {
+					Optional<BlockData> block = recipe.getOutput(0);
+					block.ifPresent(b -> b.set(this.world, floorPos));
 				}
-
-				// enact transformation
-				removed.forEach((i, a) -> i.getStack()
-				                           .decrement(a));
-				Optional<BlockData> block = recipe.getOutput(0);
-				List<ItemStack> output = recipe.getOutput(1);
-				for (int i = 0; i < output.size(); i++) {
-					output.set(i,
-					           output.get(i)
-					                 .copy()
-					);
-				}
-
-				ItemScatterer.spawn(this.world,
-				                    this.getBlockPos()
-				                        .up(),
-				                    DefaultedListAccess.createDefaultedList(output, ItemStack.EMPTY)
-				);
-				block.ifPresent(b -> b.set(this.world, floorPos));
 			}
 		}
-	}
-
-	// hackfix to prevent people from loosing items when an anvil falls on their ingredients because merging is not properly implemented
-	@Redirect(method = "handleFallDamage", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;getEntities(Lnet/minecraft/entity/Entity;Lnet/minecraft/util/math/Box;)Ljava/util/List;"))
-	private List<Entity> blacklistItems(World world, Entity except, Box box) {
-		return world.getEntities(except, box, e -> !(e instanceof ItemEntity));
 	}
 
 	@Inject (method = "doesRenderOnFire", at = @At ("TAIL"), cancellable = true)

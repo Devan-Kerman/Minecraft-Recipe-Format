@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,10 +20,14 @@ import net.minecraft.util.profiler.Profiler;
 import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.SimpleResourceReloadListener;
 
+/**
+ * a utility class for easy reloading support, refreshing recipes automatically update their internal recipe list on reload, if u need to sort out the
+ * recipes in advance for performance's sake, u can override {@link #postReload()}
+ */
 public class RefreshingRecipe implements Iterable<Recipe> {
 	private static final AtomicInteger CURRENT_ID = new AtomicInteger();
 
-	private final List<Recipe> instance = new ArrayList<>();
+	private final List<Recipe> instance = new Vector<>();
 	private final Identifier id;
 
 	public RefreshingRecipe(Identifier identifier, RecipeSchema schema) {
@@ -60,6 +65,10 @@ public class RefreshingRecipe implements Iterable<Recipe> {
 		});
 	}
 
+	/**
+	 * called after the recipe is done reloading,
+	 * this is called asynchronously!
+	 */
 	protected void postReload() {
 		System.out.println(this.id + " is done reloading!");
 	}

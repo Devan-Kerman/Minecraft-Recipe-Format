@@ -9,6 +9,12 @@ import net.devtech.mcrf.recipes.Recipe;
 import net.devtech.mcrf.recipes.RecipeSchema;
 import net.devtech.mcrf.util.Id;
 
+/**
+ * this is a post processing element parser that allows you to determine how to parse the inputs based on the machine,
+ * because of the nature of the syntax (the fact the machine identifier is declared after it's inputs) you can't know what
+ * machine you're using before parsing the inputs, but this let's you do that by simply storing the string, and post-processing it afterwards
+ * @see RecipeSchema.DynamicBuilder
+ */
 public class RetroactiveElementParser implements ElementParser<StringBuilder> {
 	private static final char[] START = Recipe.START_STR.toCharArray();
 

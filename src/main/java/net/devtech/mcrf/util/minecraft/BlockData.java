@@ -1,4 +1,4 @@
-package net.devtech.mcrf.util.world;
+package net.devtech.mcrf.util.minecraft;
 
 import net.devtech.mcrf.util.MCRFUtil;
 
@@ -10,7 +10,11 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 /**
- * a blockstate and it's block entity
+ * a blockstate and it's block entity, formatted as
+ *
+ * block:id[blockstate=properties]{blockEntity:"nbt_data"}
+ *
+ * the properties and block entities field are both optional, and if left blank are the default state and null respectively
  */
 public final class BlockData {
 	private final BlockState state;

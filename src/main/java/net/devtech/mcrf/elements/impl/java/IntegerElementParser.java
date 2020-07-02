@@ -6,6 +6,9 @@ import java.util.Arrays;
 
 import net.devtech.mcrf.elements.ElementParser;
 
+/**
+ * parses normal integers, with hex and binary support with the prefixes 'Ox' and '0b' respectively
+ */
 public interface IntegerElementParser<T> extends ElementParser<T> {
 	char[] HEX_HEADER = "0x".toCharArray();
 	char[] BINARY_HEADER = "0b".toCharArray();

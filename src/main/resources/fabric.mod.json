@@ -12,6 +12,7 @@
       "net.devtech.mcrf.MCRF"
     ]
   },
+  "accessWidener" : "mcrf.accesswidener",
   "contact": {
     "sources": "https://github.com/Devan-Kerman/Minecraft-Recipe-Format"
   },

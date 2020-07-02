@@ -4,12 +4,17 @@ import java.io.IOException;
 import java.io.Reader;
 
 import net.devtech.mcrf.elements.ElementParser;
-import net.devtech.mcrf.util.world.EntityData;
+import net.devtech.mcrf.util.minecraft.EntityData;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
 
+/**
+ * parses entitydata, looks like this:
+ *
+ * @param <T>
+ */
 public class EntityElementParser<T extends Entity> implements ElementParser<EntityData<T>> {
 	@Override
 	@SuppressWarnings ("unchecked")

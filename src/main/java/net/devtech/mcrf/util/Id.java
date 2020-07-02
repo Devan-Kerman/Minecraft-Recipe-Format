@@ -4,7 +4,11 @@ import java.util.Objects;
 
 import net.minecraft.util.Identifier;
 
-public final class Id {
+/**
+ * {@link Identifier}2, this project was originally detatched from minecraft and then migrated here, it's a useful abstraction and I think the yarn name
+ * should be this cus it's shorter, but idc
+ */
+public final class Id implements Comparable<Id> {
 	public final String namespace;
 	public final String val;
 
@@ -57,5 +61,10 @@ public final class Id {
 	@Override
 	public String toString() {
 		return this.namespace+':'+this.val;
+	}
+
+	@Override
+	public int compareTo(Id o) {
+		return this.namespace.compareTo(o.namespace) + this.val.compareTo(o.val);
 	}
 }

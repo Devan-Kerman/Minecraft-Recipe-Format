@@ -1,4 +1,0 @@
-% surface     +    items      +      flaming          ->        result_surface + items
-#logs + [iron_ingot x4, gold_ingot] + true --[mcrf:falling_anvil]-> stone +   [iron_block]
-%                                                   '*' = "no change"
-iron_block + [stone] + false --[mcrf:falling_anvil]-> * + [iron_ingot]

@@ -26,12 +26,24 @@ public interface RecipeSchema {
 
 	Iterator<ElementParser<?>> getOutputs(Id machine);
 
+	/**
+	 * a dynamic schema can change it's element types during and after parsing,
+	 * although it may be less performant, it allows modders to parse multiple
+	 * recipes from the same file, and add more rich recipe systems.
+	 *
+	 * dynamic outputs do not change the performance, however if you use dynamic inputs,
+	 * you must use a {@link RetroactiveElementParser} or other element parser that supports
+	 * retroactive parsing. for example if all of your recipes start with an ID, then some
+	 * combination of elements after it which depends on the machine {@link net.devtech.mcrf.defaults.MinecraftRecipes}
+	 * you can first read all of the inputs, store them for later, then parse the machine id, and the outputs, then
+	 * go back and parse the inputs. This is what enables us to have all vanilla recipes in a single file.
+	 */
 	class DynamicBuilder implements RetroactiveSchema {
 		private final Map<Id, List<ElementParser<?>>> inputs = new HashMap<>();
 		private final Map<Id, List<ElementParser<?>>> outputs = new HashMap<>();
 
 		public DynamicBuilder addDefault(ElementParser<?>... defaultInputs) {
-			return this.addInput((Id) null, defaultInputs);
+			return this.addInput(null, defaultInputs);
 		}
 
 		public DynamicBuilder addInputs(Id[] id, ElementParser<?>... inputs) {
@@ -69,13 +81,17 @@ public interface RecipeSchema {
 		}
 	}
 
+	/**
+	 * a regular schema who's outputs or inputs does not change based on parameters
+	 */
 	class Builder implements RecipeSchema {
 		private final List<ElementParser<?>> inputs = new ArrayList<>();
 		private final List<ElementParser<?>> outputs = new ArrayList<>();
-		private final Id machine;
+		private final Id[] machine;
 
-		public Builder(Id machine) {
+		public Builder(Id...machine) {
 			this.machine = machine;
+			Arrays.sort(machine);
 		}
 
 		public Builder addInput(ElementParser<?> type) {
@@ -98,10 +114,10 @@ public interface RecipeSchema {
 
 		@Override
 		public Iterator<ElementParser<?>> getOutputs(Id machine) {
-			if (this.machine.equals(machine)) {
+			if (Arrays.binarySearch(this.machine, machine) != -1) {
 				return this.outputs.iterator();
 			} else {
-				throw new IllegalArgumentException("attempted to make recipe with machine " + this.machine + " but user entered " + machine + '!');
+				throw new IllegalArgumentException("attempted to make recipe with machine " + Arrays.toString(this.machine) + " but user entered " + machine + '!');
 			}
 		}
 	}

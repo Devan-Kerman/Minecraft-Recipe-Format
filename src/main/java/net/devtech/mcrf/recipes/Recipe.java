@@ -41,6 +41,11 @@ public final class Recipe {
 		this.outputs = outputs;
 	}
 
+	/**
+	 * parse all the recipes in a given file
+	 * @see net.devtech.mcrf.defaults.MinecraftRecipes
+	 * @see net.devtech.mcrf.util.RefreshingRecipe
+	 */
 	public static List<Recipe> parse(LineTrackingReader reader, RecipeSchema schema) throws IOException {
 		List<Recipe> recipes = new ArrayList<>();
 		while (true) {

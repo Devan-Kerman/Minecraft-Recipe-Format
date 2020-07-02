@@ -28,12 +28,15 @@ import net.devtech.mcrf.util.io.CommentStrippingReader;
 import net.devtech.mcrf.util.io.LineTrackingReader;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.recipe.BlastingRecipe;
 import net.minecraft.recipe.CampfireCookingRecipe;
 import net.minecraft.recipe.Ingredient;
 import net.minecraft.recipe.RecipeType;
 import net.minecraft.recipe.ShapedRecipe;
 import net.minecraft.recipe.ShapelessRecipe;
+import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.recipe.SmithingRecipe;
+import net.minecraft.recipe.SmokingRecipe;
 import net.minecraft.recipe.StonecuttingRecipe;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
@@ -103,8 +106,9 @@ public class MinecraftRecipes {
 				if (CRAFTING_TABLE.equals(machine)) {
 					if (((List<?>) recipe.getInput(1)).get(0) instanceof List) {
 						// nested list = shaped
-						map.computeIfAbsent(RecipeType.CRAFTING, c -> ImmutableMap.builder())
-						   .put(recipeId, new ShapedRecipe(recipeId, "", 3, 3, flatten(recipe.getInput(1)), recipe.getOutput(0)));
+						ImmutableMap.Builder<Identifier, net.minecraft.recipe.Recipe<?>> instance = map.computeIfAbsent(RecipeType.CRAFTING, c -> ImmutableMap.builder());
+						ImmutableMap<Identifier, net.minecraft.recipe.Recipe<?>> recipeMap = instance.build();
+						instance.put(recipeId, new ShapedRecipe(recipeId, "", 3, 3, flatten(recipe.getInput(1)), recipe.getOutput(0)));
 					} else {
 						List<Ingredient> shapeless = recipe.getInput(1);
 						map.computeIfAbsent(RecipeType.CRAFTING, c -> ImmutableMap.builder())
@@ -137,13 +141,13 @@ public class MinecraftRecipes {
 						   .put(recipeId, new CampfireCookingRecipe(recipeId, "", base, output, exp, time));
 					} else if(SMOKING.equals(machine)) {
 						map.computeIfAbsent(RecipeType.SMOKING, c -> ImmutableMap.builder())
-						   .put(recipeId, new CampfireCookingRecipe(recipeId, "", base, output, exp, time));
+						   .put(recipeId, new SmokingRecipe(recipeId, "", base, output, exp, time));
 					} else if(BLASTING.equals(machine)) {
 						map.computeIfAbsent(RecipeType.BLASTING, c -> ImmutableMap.builder())
-						   .put(recipeId, new CampfireCookingRecipe(recipeId, "", base, output, exp, time));
+						   .put(recipeId, new BlastingRecipe(recipeId, "", base, output, exp, time));
 					} else {
 						map.computeIfAbsent(RecipeType.SMELTING, c -> ImmutableMap.builder())
-						   .put(recipeId, new CampfireCookingRecipe(recipeId, "", base, output, exp, time));
+						   .put(recipeId, new SmeltingRecipe(recipeId, "", base, output, exp, time));
 					}
 				}
 			}
@@ -151,6 +155,7 @@ public class MinecraftRecipes {
 			throw new RuntimeException(e);
 		}
 	}
+
 
 	private static DefaultedList<Ingredient> flatten(Object object) {
 		List<List<Ingredient>> itemss = (List<List<Ingredient>>) object;

@@ -5,6 +5,9 @@ import java.io.Reader;
 
 import net.devtech.mcrf.elements.ElementParser;
 
+/**
+ * unquoted strings
+ */
 public class StringElementParser implements ElementParser<String> {
 	public static final StringElementParser INSTANCE = new StringElementParser();
 	private StringElementParser() {}

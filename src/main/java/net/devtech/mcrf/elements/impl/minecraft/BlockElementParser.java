@@ -7,13 +7,16 @@ import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.devtech.mcrf.elements.ElementParser;
 import net.devtech.mcrf.util.MCRFUtil;
-import net.devtech.mcrf.util.world.BlockData;
+import net.devtech.mcrf.util.minecraft.BlockData;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.command.arguments.BlockArgumentParser;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 
+/**
+ * an element parser that parses blocks, block properties, and block entity data all in one go
+ */
 public class BlockElementParser implements ElementParser<BlockData> {
 	@Override
 	public BlockData parse(Reader reader) throws IllegalArgumentException, IOException {

@@ -1,0 +1,4 @@
+accessWidener	v1	named
+accessible method net/minecraft/recipe/Ingredient$TagEntry <init> (Lnet/minecraft/tag/Tag;)V
+accessible class net/minecraft/recipe/Ingredient$TagEntry
+accessible field net/minecraft/entity/Entity MAX_ENTITY_ID Ljava/util/concurrent/atomic/AtomicInteger;

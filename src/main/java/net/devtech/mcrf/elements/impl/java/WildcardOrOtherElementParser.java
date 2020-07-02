@@ -7,6 +7,9 @@ import java.util.Optional;
 import net.devtech.mcrf.elements.ElementParser;
 import net.devtech.mcrf.util.MCRFUtil;
 
+/**
+ * an optional element, if '*' is found, it's considered not present
+ */
 public class WildcardOrOtherElementParser<T> implements ElementParser<Optional<T>> {
 	private final ElementParser<T> other;
 

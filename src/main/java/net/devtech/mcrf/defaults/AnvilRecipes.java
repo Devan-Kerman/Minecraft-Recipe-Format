@@ -58,7 +58,7 @@ public class AnvilRecipes {
 	public static final List<Recipe> MINECRAFT = new Vector<>();
 	public static final List<Recipe> MCRF = new Vector<>();
 
-	public static final RefreshingRecipe RECIPES = new RefreshingRecipe(ANVIL.asIdentifier(), SCHEMA) {
+	public static final RefreshingRecipe RECIPES = new RefreshingRecipe(FALLING_ANVIL.asIdentifier(), SCHEMA) {
 		@Override
 		protected void postReload() {
 			for (Recipe recipe : this) {

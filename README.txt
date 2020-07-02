@@ -75,3 +75,35 @@ Ingredients: supports arrays/singletons of tags and items, ex. #[tag:id, tag2:id
 Items: same as identifiers but only for items
 
 ItemStacks: an identifier, nbt data and an amount, ex. item:id, item:id{nbt:"data"}, item:id{nbt:"data"} x4, item:id x5
+
+Default recipes:
+    Anvils
+mcrf/falling_anvil
+has support for normal anvil recipes, and falling anvil recipes
+for normal anvils, the format is
+mcrf:ingredient + mcrf:ingredient + xp --[minecraft:anvil]-> mcrf:ingredient
+
+    Minecraft recipes
+mcrf/minecraft
+all recipe's first ingredient is the identifier of the recipe, and yes, you can override vanilla recipes with this
+
+crafting recipes:
+shapeless recipes can be made with a single, non nested array, these only support vanilla ingredients.
+(identifier) + (list of ingredient) --[minecraft:crafting_table]-> (itemstack)
+recipe:id + [stone, stone, iron_ingot] --[minecraft:crafting_table]-> stone
+
+shaped recipes are made with nested arays
+(identifier) + (list of list of ingredient) --[minecraft:crafting_table]-> (itemstack)
+recipe:id + [[stone, stone, stone], [stone, air, stone], [stone, stone, stone]] --[minecraft:crafting_table]-> stone x9
+
+
+stone cutting:
+(identifier) + (ingredient) --[minecraft:stone_cutter] -> (itemstack)
+recipe:id + stone --[minecraft:stone_cutter]-> iron_ingot
+
+smithing table:
+(identifier) + (ingredient) + (ingredient) --[minecraft:smithing_table]-> (itemstack)
+
+campfire, smoker, blast_furnace, furnace:
+(identifier) + (ingredient) + (int : time) --[minecraft:%MACHINE_ID%]-> (itemstack) + (exp)
+

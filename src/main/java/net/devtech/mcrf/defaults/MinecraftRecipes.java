@@ -63,6 +63,7 @@ public class MinecraftRecipes {
 					                                                           SMELTING,
 					                                                           SMITHING
 			                                                           }, INGREDIENT)
+			                                                           .addInputs(new Id[]{CAMPFIRE, SMOKING, BLASTING, SMELTING}, INTEGER)
 			                                                           .addInput(SMITHING, INGREDIENT)
 			                                                           // output
 			                                                           .addOutputs(new Id[] {
@@ -79,7 +80,7 @@ public class MinecraftRecipes {
 					                                                           BLASTING,
 					                                                           SMELTING,
 					                                                           CAMPFIRE
-			                                                           }, FLOAT, INTEGER);
+			                                                           }, FLOAT);
 
 	static {
 		LoadRecipeCallback.EVENT.register(((map, manager) -> {
@@ -133,9 +134,10 @@ public class MinecraftRecipes {
 				} else {
 					// SMELTING
 					Ingredient base = recipe.getInput(1);
+					int time = recipe.getInput(2);
+
 					ItemStack output = recipe.getOutput(0);
 					float exp = recipe.getOutput(1);
-					int time = recipe.getOutput(2);
 					if(CAMPFIRE.equals(machine)) {
 						map.computeIfAbsent(RecipeType.CAMPFIRE_COOKING, c -> ImmutableMap.builder())
 						   .put(recipeId, new CampfireCookingRecipe(recipeId, "", base, output, exp, time));

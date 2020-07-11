@@ -9,7 +9,7 @@ repositories {
 	}
 }
 dependencies {
-  modImplementation group: 'net.devtech', name: 'Minecraft-Recipe-Format', version: '1.0.1'
+  modImplementation group: 'net.devtech', name: 'Minecraft-Recipe-Format', version: '1.0.4'
 }
 ```
 

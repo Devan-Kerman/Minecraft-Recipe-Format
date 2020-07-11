@@ -3,15 +3,18 @@
   "package": "net.devtech.mcrf.mixin",
   "compatibilityLevel": "JAVA_8",
   "mixins": [
-    "DefaultedListAccess",
     "ArmorStandEntityAccess",
+    "DefaultedListAccess",
     "IngredientAccessor",
     "ItemEntityAccess",
     "RecipeManagerMixin",
     "recipes.AnvilContainerMixin",
-    "recipes.FallingBlockMixin",
+    "recipes.FallingBlockEntityMixin",
     "recipes.GuardianEntityMixin",
     "recipes.ItemEntityMixin"
+  ],
+  "client": [
+    "recipes.SeperateFallingBlockEntityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

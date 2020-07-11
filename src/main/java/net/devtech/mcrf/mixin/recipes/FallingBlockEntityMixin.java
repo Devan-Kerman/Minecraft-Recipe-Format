@@ -28,14 +28,16 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.world.World;
 
+import net.fabricmc.api.EnvType;
+import net.fabricmc.api.Environment;
 import net.fabricmc.fabric.api.tag.TagRegistry;
 
 @Mixin (FallingBlockEntity.class)
-public abstract class FallingBlockMixin extends Entity {
+public abstract class FallingBlockEntityMixin extends Entity {
 	@Shadow private BlockState block;
 	@Unique private static final Tag<Block> ANVILS = TagRegistry.block(new Identifier("anvil"));
 
-	public FallingBlockMixin(EntityType<?> type, World world) {
+	public FallingBlockEntityMixin(EntityType<?> type, World world) {
 		super(type, world);
 	}
 
@@ -77,10 +79,5 @@ public abstract class FallingBlockMixin extends Entity {
 				}
 			}
 		}
-	}
-
-	@Inject (method = "doesRenderOnFire", at = @At ("TAIL"), cancellable = true)
-	private void setTrue(CallbackInfoReturnable<Boolean> cir) {
-		cir.setReturnValue(true);
 	}
 }

@@ -9,9 +9,13 @@ repositories {
 	}
 }
 dependencies {
-  modImplementation group: 'net.devtech', name: 'Minecraft-Recipe-Format', version: '1.0.4'
+  modImplementation group: 'net.devtech', name: 'Minecraft-Recipe-Format', version: '1.1.4'
 }
 ```
+
+# MCRF developer documentation
+net.devtech.mcrf.util.RefreshingRecipe
+and net.devtech.mcrf.recipes.RecipeSchema and it's inner classes
 
 # MCRF user documentation
 

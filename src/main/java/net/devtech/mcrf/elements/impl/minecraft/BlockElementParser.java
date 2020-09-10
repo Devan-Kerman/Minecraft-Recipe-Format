@@ -10,7 +10,7 @@ import net.devtech.mcrf.util.MCRFUtil;
 import net.devtech.mcrf.util.minecraft.BlockData;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.command.arguments.BlockArgumentParser;
+import net.minecraft.command.argument.BlockArgumentParser;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Identifier;
 

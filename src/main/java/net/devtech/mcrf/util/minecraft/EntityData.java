@@ -5,6 +5,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -24,11 +25,11 @@ public final class EntityData<T extends Entity> {
 		this.tag = compoundTag;
 	}
 
-	public Entity create(World world, BlockPos pos) {
+	public Entity create(ServerWorld world, BlockPos pos) {
 		return this.create(world, null, null, pos, SpawnReason.TRIGGERED, false, false);
 	}
 
-	public Entity create(World world, /*nullable*/ Text name, /*nullable*/ PlayerEntity player, BlockPos pos, SpawnReason spawnReason, boolean alignPosition, boolean invertY) {
+	public Entity create(ServerWorld world, /*nullable*/ Text name, /*nullable*/ PlayerEntity player, BlockPos pos, SpawnReason spawnReason, boolean alignPosition, boolean invertY) {
 		return this.type.create(world, this.tag.copy(), name, player, pos, spawnReason, alignPosition, invertY);
 	}
 

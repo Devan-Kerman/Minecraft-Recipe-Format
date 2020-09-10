@@ -1,7 +1,10 @@
 package net.devtech.mcrf.util;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Vector;
@@ -32,42 +35,46 @@ public class RefreshingRecipe implements Iterable<Recipe> {
 
 	public RefreshingRecipe(Identifier identifier, RecipeSchema schema) {
 		this.id = identifier;
-		ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new SimpleResourceReloadListener<List<Recipe>>() {
-			@Override
-			public Identifier getFabricId() {
-				return new Identifier(identifier.getNamespace(), identifier.getPath() + "_autorefreshing_recipe_"+CURRENT_ID);
-			}
+		ResourceManagerHelper.get(ResourceType.SERVER_DATA)
+		                     .registerReloadListener(new SimpleResourceReloadListener<List<Recipe>>() {
+			                     @Override
+			                     public Identifier getFabricId() {
+				                     return new Identifier(identifier.getNamespace(), identifier.getPath() + "_autorefreshing_recipe_" + CURRENT_ID);
+			                     }
 
-			@Override
-			public CompletableFuture<List<Recipe>> load(ResourceManager manager, Profiler profiler, Executor executor) {
-				return CompletableFuture.supplyAsync(() -> {
-					List<Recipe> recipes = new ArrayList<>();
-					for (Identifier resource : manager.findResources(identifier, s -> s.endsWith(".mcrf"))) {
-						try {
-							recipes.addAll(Recipe.parse(manager.getResource(resource)
-							                                   .getInputStream(), schema));
-						} catch (IOException e) {
-							throw new RuntimeException(e);
-						}
-					}
-					return recipes;
-				});
-			}
+			                     @Override
+			                     public CompletableFuture<List<Recipe>> load(ResourceManager manager, Profiler profiler, Executor executor) {
+				                     return CompletableFuture.supplyAsync(() -> {
+					                     try {
+						                     List<Recipe> recipes = new ArrayList<>();
+						                     for (Identifier resource : manager.findResources(identifier.getNamespace() + '/' + identifier.getPath(),
+						                                                                      i -> i.endsWith(".mcrf"))) {
+							                     InputStream stream = manager.getResource(resource)
+							                                                 .getInputStream();
+							                     recipes.addAll(Recipe.parse(stream, schema));
+						                     }
+						                     return recipes;
+					                     } catch (FileNotFoundException e) {
+						                     return Collections.emptyList();
+					                     } catch (IOException e) {
+						                     throw new RuntimeException(e);
+					                     }
+				                     });
+			                     }
 
-			@Override
-			public CompletableFuture<Void> apply(List<Recipe> data, ResourceManager manager, Profiler profiler, Executor executor) {
-				return CompletableFuture.runAsync(() -> {
-					RefreshingRecipe.this.instance.clear();
-					RefreshingRecipe.this.instance.addAll(data);
-					RefreshingRecipe.this.postReload();
-				});
-			}
-		});
+			                     @Override
+			                     public CompletableFuture<Void> apply(List<Recipe> data, ResourceManager manager, Profiler profiler, Executor executor) {
+				                     return CompletableFuture.runAsync(() -> {
+					                     RefreshingRecipe.this.instance.clear();
+					                     RefreshingRecipe.this.instance.addAll(data);
+					                     RefreshingRecipe.this.postReload();
+				                     });
+			                     }
+		                     });
 	}
 
 	/**
-	 * called after the recipe is done reloading,
-	 * this is called asynchronously!
+	 * called after the recipe is done reloading, this is called asynchronously!
 	 */
 	protected void postReload() {
 		System.out.println(this.id + " is done reloading!");

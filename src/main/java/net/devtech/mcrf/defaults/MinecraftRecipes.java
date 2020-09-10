@@ -8,14 +8,16 @@ import static net.devtech.mcrf.elements.ElementParser.ITEM_STACK;
 import static net.devtech.mcrf.elements.ElementParser.RETROACTIVE;
 import static net.devtech.mcrf.elements.ElementParser.list;
 
-import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableMap;
 import net.devtech.mcrf.callbacks.LoadRecipeCallback;
@@ -24,8 +26,6 @@ import net.devtech.mcrf.mixin.DefaultedListAccess;
 import net.devtech.mcrf.recipes.Recipe;
 import net.devtech.mcrf.recipes.RecipeSchema;
 import net.devtech.mcrf.util.Id;
-import net.devtech.mcrf.util.io.CommentStrippingReader;
-import net.devtech.mcrf.util.io.LineTrackingReader;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.recipe.BlastingRecipe;
@@ -38,6 +38,7 @@ import net.minecraft.recipe.SmeltingRecipe;
 import net.minecraft.recipe.SmithingRecipe;
 import net.minecraft.recipe.SmokingRecipe;
 import net.minecraft.recipe.StonecuttingRecipe;
+import net.minecraft.resource.Resource;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.collection.DefaultedList;
 
@@ -63,7 +64,12 @@ public class MinecraftRecipes {
 					                                                           SMELTING,
 					                                                           SMITHING
 			                                                           }, INGREDIENT)
-			                                                           .addInputs(new Id[]{CAMPFIRE, SMOKING, BLASTING, SMELTING}, INTEGER)
+			                                                           .addInputs(new Id[] {
+					                                                           CAMPFIRE,
+					                                                           SMOKING,
+					                                                           BLASTING,
+					                                                           SMELTING
+			                                                           }, INTEGER)
 			                                                           .addInput(SMITHING, INGREDIENT)
 			                                                           // output
 			                                                           .addOutputs(new Id[] {
@@ -85,21 +91,25 @@ public class MinecraftRecipes {
 	static {
 		LoadRecipeCallback.EVENT.register(((map, manager) -> {
 			LOGGER.info("loading...");
-			for (Identifier resource : manager.findResources(new Identifier("mcrf", "minecraft"), s -> s.endsWith(".mcrf"))) {
-				try {
-					loadFromStream(resource, map, manager.getResource(resource)
-					                                     .getInputStream());
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+			try {
+				Set<Identifier> uniqueValues = new HashSet<>();
+				for (Identifier identifier : manager.findResources("mcrf", i -> i.endsWith(".mcrf"))) {
+					if (uniqueValues.add(identifier)) {
+						Resource resource = manager.getResource(identifier);
+						InputStream stream = resource.getInputStream();
+						loadFromStream(map, stream);
+					}
 				}
+			} catch (IOException e) {
+				throw new RuntimeException(e);
 			}
 		}));
 	}
 
-	public static void loadFromStream(Identifier resource, Map<RecipeType<?>, ImmutableMap.Builder<Identifier, net.minecraft.recipe.Recipe<?>>> map, InputStream manager) {
+	public static void loadFromStream(Map<RecipeType<?>, ImmutableMap.Builder<Identifier, net.minecraft.recipe.Recipe<?>>> map,
+	                                  InputStream manager) {
 		try {
 			List<Recipe> recipes = Recipe.parse(manager, MINECRAFT_RECIPE_SCHEMA);
-			LOGGER.info(recipes.size() + " found in " + resource);
 			for (Recipe recipe : recipes) {
 				Identifier recipeId = recipe.getInput(0);
 				Id machine = recipe.getMachine();
@@ -107,8 +117,8 @@ public class MinecraftRecipes {
 				if (CRAFTING_TABLE.equals(machine)) {
 					if (((List<?>) recipe.getInput(1)).get(0) instanceof List) {
 						// nested list = shaped
-						ImmutableMap.Builder<Identifier, net.minecraft.recipe.Recipe<?>> instance = map.computeIfAbsent(RecipeType.CRAFTING, c -> ImmutableMap.builder());
-						ImmutableMap<Identifier, net.minecraft.recipe.Recipe<?>> recipeMap = instance.build();
+						ImmutableMap.Builder<Identifier, net.minecraft.recipe.Recipe<?>> instance = map.computeIfAbsent(RecipeType.CRAFTING,
+						                                                                                                c -> ImmutableMap.builder());
 						instance.put(recipeId, new ShapedRecipe(recipeId, "", 3, 3, flatten(recipe.getInput(1)), recipe.getOutput(0)));
 					} else {
 						List<Ingredient> shapeless = recipe.getInput(1);
@@ -117,9 +127,7 @@ public class MinecraftRecipes {
 						        new ShapelessRecipe(recipeId,
 						                            "",
 						                            recipe.getOutput(0),
-						                            DefaultedListAccess.createDefaultedList(shapeless, Ingredient.EMPTY)
-						        )
-						   );
+						                            DefaultedListAccess.createDefaultedList(shapeless, Ingredient.EMPTY)));
 					}
 				} else if (STONE_CUTTING.equals(machine)) {
 					// stone cutting
@@ -138,13 +146,13 @@ public class MinecraftRecipes {
 
 					ItemStack output = recipe.getOutput(0);
 					float exp = recipe.getOutput(1);
-					if(CAMPFIRE.equals(machine)) {
+					if (CAMPFIRE.equals(machine)) {
 						map.computeIfAbsent(RecipeType.CAMPFIRE_COOKING, c -> ImmutableMap.builder())
 						   .put(recipeId, new CampfireCookingRecipe(recipeId, "", base, output, exp, time));
-					} else if(SMOKING.equals(machine)) {
+					} else if (SMOKING.equals(machine)) {
 						map.computeIfAbsent(RecipeType.SMOKING, c -> ImmutableMap.builder())
 						   .put(recipeId, new SmokingRecipe(recipeId, "", base, output, exp, time));
-					} else if(BLASTING.equals(machine)) {
+					} else if (BLASTING.equals(machine)) {
 						map.computeIfAbsent(RecipeType.BLASTING, c -> ImmutableMap.builder())
 						   .put(recipeId, new BlastingRecipe(recipeId, "", base, output, exp, time));
 					} else {

@@ -39,7 +39,7 @@ public final class MCRFUtil {
 	 * @return true if the recipe was sucessfully executed
 	 */
 	public static boolean executeInWorldRecipe(World world, BlockPos pos, List<Either<CountedTags<Item>, ItemStack>> ingredients, List<ItemStack> output) {
-		List<ItemEntity> stacks = world.getEntities(EntityType.ITEM, new Box(pos), e -> true);
+		List<ItemEntity> stacks = world.getEntitiesByType(EntityType.ITEM, new Box(pos), e -> true);
 		for (ItemEntity stack : stacks) {
 			((ItemEntityAccess) stack).callTryMerge();
 		}
